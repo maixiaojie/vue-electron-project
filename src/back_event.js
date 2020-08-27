@@ -24,10 +24,22 @@ const is_a_nodejs_project = (dir) => {
     }
     return false
 }
+
+const openInVSC = (path) => {
+    const exec = require('child_process').exec
+    let sh = `code ${path}`
+    console.log(sh)
+    exec(sh)
+}
 const listen_start = () => {
     ipcMain.answerRenderer('is_a_nodejs_project', arg => {
         return new Promise((resolve) => {
             resolve(is_a_nodejs_project(arg))
+        })
+    })
+    ipcMain.answerRenderer('openInVSC', arg => {
+        return new Promise((resolve) => {
+            resolve(openInVSC(arg))
         })
     })
 }

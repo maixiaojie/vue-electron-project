@@ -2,16 +2,18 @@ import Vue from 'vue'
 import { Button, Tabs, Radio, Col, Row, Table, Tag, Icon, Divider, message } from 'ant-design-vue'
 import { is_app } from '@/utils/env.js'
 import storage from '@/plugin/storage.js'
-import { getRemote, getIpcRenderer } from '@/plugin/remote'
+import { getElectron, getRemote, getIpcRenderer } from '@/plugin/remote'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 
 if (is_app) {
+  const electron = getElectron()
   const ipcRenderer = getIpcRenderer()
   Vue.prototype.$remote = getRemote();
   Vue.prototype.$ipcRenderer = ipcRenderer
   Vue.prototype.$storage = storage;
+  Vue.prototype.$electron = electron;
 
   // fix for electron-better-ipc
   // from https://github.com/sindresorhus/electron-better-ipc/issues/35

@@ -12,10 +12,12 @@
       <a-table :columns="columns" :data-source="data">
         <a slot="name" slot-scope="text">{{ text }}</a>
         <span slot="customTitle"><a-icon type="smile-o" /> 项目名称</span>
-        <span slot="action">
-          <a>打开项目</a>
+        <span slot="action" slot-scope="row">
+          <a @click="openProjectInFinder(row)">在finder中打开</a>
           <a-divider type="vertical"></a-divider>
-          <a>打开项目</a>
+          <a @click="openProjectVSC(row)">在vscode中打开</a>
+          <a-divider type="vertical"></a-divider>
+          <!-- <a>打开项目</a> -->
         </span>
       </a-table>
     </a-row>
@@ -64,6 +66,12 @@ export default {
     getProjects() {
       const res = this.pm.getAll() || []
       this.data = res
+    },
+    async openProjectVSC(info) {
+      await this.$ipcRenderer.callMain('openInVSC', info.dir)
+    },
+    openProjectInFinder(info) {
+      this.$electron.shell.openPath(info.dir)
     },
     addProject() {
       this.$remote.dialog
