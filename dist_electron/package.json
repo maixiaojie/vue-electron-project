@@ -1,5 +1,5 @@
 {
-  "name": "vue-electron-notes",
+  "name": "vue-electron-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -46,7 +46,6 @@
     "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {
-    "pre-commit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,jsx,vue}": [

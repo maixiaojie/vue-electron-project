@@ -1,11 +1,16 @@
 import store from '@/plugin/storage'
 
-const key = 'project_list'
+const key = 'project'
 
 export default class ProjectModal {
     getAll() {
         let res = store.get(key)
-        res = JSON.parse(res)
+        try {
+            res = JSON.parse(res)
+        } catch (e) {
+            res = []
+        }
+
         return Array.isArray(res) ? res : []
     }
 
