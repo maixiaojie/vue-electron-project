@@ -15,9 +15,9 @@
   "main": "background.js",
   "dependencies": {
     "ant-design-vue": "^1.6.4",
+    "conf": "^7.1.1",
     "core-js": "^3.6.5",
     "electron-better-ipc": "^1.1.0",
-    "electron-json-storage": "^4.2.0",
     "jsonfile": "^6.0.1",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",

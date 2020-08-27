@@ -13,6 +13,7 @@ const get_pkg_info = (dir) => {
             path: file_path,
             name: pkg.name || '',
             version: pkg.version || 0,
+            ts: new Date().getTime()
         }
     }
     return false
@@ -25,8 +26,9 @@ const is_a_nodejs_project = (dir) => {
 }
 const listen_start = () => {
     ipcMain.answerRenderer('is_a_nodejs_project', arg => {
-        const reply = is_a_nodejs_project(arg)
-        return reply
+        return new Promise((resolve) => {
+            resolve(is_a_nodejs_project(arg))
+        })
     })
 }
 

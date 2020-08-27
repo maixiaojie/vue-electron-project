@@ -15,6 +15,7 @@ module.exports = {
     'no-debugger': 0,
     'import/named': 0,
     semi: 0,
+    'arrow-body-style': 0,
     // semi: ['error', 'never'], // 禁用 分号
     'no-multiple-empty-lines': ['error'], // 代码空行 数量
     'linebreak-style': [0, 'error', 'windows'], // 使用windows的换行
@@ -63,6 +64,7 @@ module.exports = {
       }
     ],
     'prefer-destructuring': 0,
+    'prefer-const': 0,
     'no-unused-expressions': ['error', { allowShortCircuit: true, allowTernary: true }] // 允许在表达式中使用三元运算符，类似于短路评估
   }
 }

@@ -1,8 +1,11 @@
 <template>
   <div class="home">
     <a-row>
-      <a-button @click="addProject" type="dashed" icon="plus">
+      <a-button style="margin-right: 5px;" @click="addProject" type="dashed" icon="plus">
         添加项目
+      </a-button>
+      <a-button @click="getProjects" type="dashed" icon="redo">
+        刷新列表
       </a-button>
     </a-row>
     <a-row style="margin-top: 20px;">
@@ -21,6 +24,7 @@
 
 <script>
 import fileMixins from '@/mixins/file.js'
+import ProjectModal from '@/model/project'
 // @ is an alias to /src
 const columns = [
   {
@@ -31,8 +35,8 @@ const columns = [
   },
   {
     title: '路径',
-    dataIndex: 'path',
-    key: 'path'
+    dataIndex: 'dir',
+    key: 'dir'
   },
   {
     title: '操作',
@@ -41,23 +45,7 @@ const columns = [
   }
 ]
 
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    path: '/vs/saa/a'
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    path: '/vs/saa/a'
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    path: '/vs/saa/a'
-  }
-]
+const data = []
 export default {
   name: 'Home',
   components: {},
@@ -68,8 +56,16 @@ export default {
       data
     }
   },
+  mounted() {
+    this.pm = new ProjectModal()
+    this.getProjects()
+  },
   methods: {
-     addProject() {
+    getProjects() {
+      const res = this.pm.getAll() || []
+      this.data = res
+    },
+    addProject() {
       this.$remote.dialog
         .showOpenDialog({
           properties: ['openDirectory']
@@ -79,9 +75,15 @@ export default {
             this.$message.info('已取消')
           } else {
             const file_path = res.filePaths[0]
-            const isa = await this.$ipcRenderer.callMain('is_a_nodejs_project', file_path)
-            console.log(isa)
+            let isa = await this.$ipcRenderer.callMain('is_a_nodejs_project', file_path)
+            if (isa) {
+              this.pm.add(isa)
+              this.getProjects()
+            }
           }
+        })
+        .catch(e => {
+          console.log(e)
         })
     }
   }

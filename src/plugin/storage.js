@@ -1,10 +1,5 @@
-const Store = require('electron-store')
+import Store from './store'
 
 const store = new Store();
 
-store.set('unicorn', '🦄');
-console.log(store.get('unicorn'));
-
-export default class Storage {
-
-}
+export default store;

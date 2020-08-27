@@ -1,5 +1,5 @@
 {
-  "name": "vue-electron-notes",
+  "name": "vue-electron-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,10 +15,9 @@
   "main": "background.js",
   "dependencies": {
     "ant-design-vue": "^1.6.4",
+    "conf": "^7.1.1",
     "core-js": "^3.6.5",
     "electron-better-ipc": "^1.1.0",
-    "electron-json-storage": "^4.2.0",
-    "electron-store": "^6.0.0",
     "jsonfile": "^6.0.1",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
@@ -47,7 +46,6 @@
     "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {
-    "pre-commit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,jsx,vue}": [

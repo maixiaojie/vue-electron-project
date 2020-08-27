@@ -1,16 +1,26 @@
 import Vue from 'vue'
 import { Button, Tabs, Radio, Col, Row, Table, Tag, Icon, Divider, message } from 'ant-design-vue'
 import { is_app } from '@/utils/env.js'
-import Storage from '@/plugin/storage.js'
+import storage from '@/plugin/storage.js'
 import { getRemote, getIpcRenderer } from '@/plugin/remote'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 
 if (is_app) {
+  const ipcRenderer = getIpcRenderer()
   Vue.prototype.$remote = getRemote();
-  Vue.prototype.$ipcRenderer = getIpcRenderer();
-  Vue.prototype.$storage = new Storage();
+  Vue.prototype.$ipcRenderer = ipcRenderer
+  Vue.prototype.$storage = storage;
+
+  // fix for electron-better-ipc
+  // from https://github.com/sindresorhus/electron-better-ipc/issues/35
+  if (ipcRenderer !== undefined) {
+    ipcRenderer.addListener(
+      'fix-event-79558e00-29ef-5c7f-84bd-0bcd9a0c5cf3',
+      () => { }
+    );
+  }
 }
 Vue.prototype.$message = message;
 Vue.use(Button);

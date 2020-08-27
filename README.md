@@ -1,4 +1,4 @@
-# vue-electron-notes
+# vue-electron-project
 
 ## Project setup
 ```
