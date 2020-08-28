@@ -17,6 +17,7 @@
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import 'xterm/css/xterm.css'
+import ShellTypeModal from '@/model/terminal.js'
 
 const os = window.require('os')
 const process = window.require('process')
@@ -25,14 +26,16 @@ const pty = window.require('profoundjs-node-pty')
 export default {
   data() {
     return {
+      model: null,
       term: null,
       pty: null,
       fitAddon: null,
-      cur_shell: '选择默认shell',
+      cur_shell: '',
       shells: ['zsh', 'bash', 'dash', 'ksh', 'csh', 'tcsh', 'sh']
     }
   },
   mounted() {
+    this.model = new ShellTypeModal()
     this.initTerm()
     window.addEventListener('resize', this.onResize)
   },
@@ -40,8 +43,11 @@ export default {
     handleShellMenuClick({ key }) {
       this.cur_shell = key
       this.pty.write(`${key} \r`)
+      this.model.set(key)
     },
     initTerm() {
+      let origin_shell_type = this.model.get()
+      this.cur_shell = origin_shell_type || '选择默认shell'
       this.term = new Terminal({
         theme: {
           background: 'rgb(0,43,54)'
@@ -50,7 +56,7 @@ export default {
       this.fitAddon = new FitAddon()
       this.term.loadAddon(this.fitAddon)
       this.term.open(document.getElementById('terminal'))
-      const shell = os.platform() === 'win32' ? 'powershell.exe' : this.shells[0]
+      const shell = os.platform() === 'win32' ? 'powershell.exe' : origin_shell_type || this.shells[0]
       this.pty = pty.spawn(shell, [], {
         name: 'xterm-color',
         cols: 80,
@@ -75,7 +81,6 @@ export default {
     }
   },
   beforeDestroy() {
-    console.log(1)
   }
 }
 </script>

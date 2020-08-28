@@ -108,7 +108,6 @@ export default {
     },
     getProjects() {
       const res = this.pm.getAll() || []
-      console.log(res)
       this.data = res
     },
     removeProjects() {
