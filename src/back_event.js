@@ -13,6 +13,7 @@ const get_pkg_info = (dir) => {
             path: file_path,
             name: pkg.name || '',
             version: pkg.version || 0,
+            tag: '',
             ts: new Date().getTime()
         }
     }

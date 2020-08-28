@@ -14,6 +14,15 @@ export default class ProjectModal {
         return Array.isArray(res) ? res : []
     }
 
+    setTag(dir, tag) {
+        let all = this.getAll()
+        const index = all.findIndex(e => e.dir === dir)
+        const target = all.filter(e => e.dir === dir)[0]
+        target.tag = tag
+        all.splice(index, 1, target)
+        store.set(key, JSON.stringify(all));
+    }
+
     has(dir) {
         let all = this.getAll();
         const target = all.filter(e => e.dir === dir)
@@ -31,7 +40,7 @@ export default class ProjectModal {
                 msg: '项目已经存在'
             }
         }
-        all.push(data)
+        all.unshift(data)
         store.set(key, JSON.stringify(all));
         return {
             code: 1,

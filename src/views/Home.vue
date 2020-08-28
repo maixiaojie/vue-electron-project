@@ -4,7 +4,7 @@
       <a-button style="margin-right: 5px;" @click="addProject" type="dashed" icon="plus">
         添加项目
       </a-button>
-      <a-button style="margin-right: 5px;" @click="getProjects" type="dashed" icon="redo">
+      <a-button style="margin-right: 5px;" @click="refreshProjects" type="dashed" icon="redo">
         刷新列表
       </a-button>
       <a-button @click="removeProjects" type="dashed" icon="delete">
@@ -12,11 +12,18 @@
       </a-button>
     </a-row>
     <a-row style="margin-top: 20px;">
-      <a-table :columns="columns" :data-source="data" rowKey="dir">
+      <a-table
+        :columns="columns"
+        :data-source="data"
+        :pagination="{ pageSize: 20 }"
+        :scroll="{ y: 300 }"
+        rowKey="dir"
+        @change="handleTableChange"
+      >
         <a slot="name" slot-scope="text, row">
           <a-popover placement="right">
             <template slot="content">
-              <p>项目目录：{{ row.name }}</p>
+              <p>项目名称：{{ row.name }}</p>
               <p>添加时间：{{ fmt(row.ts) }}</p>
               <p>
                 版本：
@@ -28,6 +35,16 @@
             {{ text }}
           </a-popover>
         </a>
+        <span slot="tag" slot-scope="row">
+          <template v-if="row.tag">
+            <a-tag color="red" closable @close="closeTag(row)">
+              {{ row.tag }}
+            </a-tag>
+          </template>
+          <template v-else>
+            <a-button size="small" @click="setTag(row)">设置标签</a-button>
+          </template>
+        </span>
         <span slot="customTitle"><a-icon type="smile-o" /> 项目名称</span>
         <span slot="action" slot-scope="row">
           <a-dropdown :trigger="['click']">
@@ -42,7 +59,9 @@
                 >
               </a-menu-item>
               <a-menu-item key="2">
-                <a @click="openProjectInTerminal(row)"><a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" /> open in Terminal</a>
+                <a @click="openProjectInTerminal(row)"
+                  ><a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" /> open in Terminal</a
+                >
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -59,6 +78,9 @@
         </span>
       </a-table>
     </a-row>
+    <a-modal v-model="setTagShow" title="设置标签" @ok="handleSetTag">
+      <a-input v-model="tag" placeholder="请输入标签，多个标签用、隔开"> </a-input>
+    </a-modal>
   </div>
 </template>
 
@@ -67,25 +89,6 @@ import { dateFormat } from '@/utils/index.js'
 import fileMixins from '@/mixins/file.js'
 import ProjectModal from '@/model/project'
 // @ is an alias to /src
-const columns = [
-  {
-    dataIndex: 'name',
-    key: 'name',
-    slots: { title: 'customTitle' },
-    scopedSlots: { customRender: 'name' }
-  },
-  {
-    title: '路径',
-    dataIndex: 'dir',
-    key: 'dir'
-  },
-  {
-    title: '操作',
-    key: 'action',
-    width: 120,
-    scopedSlots: { customRender: 'action' }
-  }
-]
 
 const data = []
 export default {
@@ -94,20 +97,88 @@ export default {
   mixins: [fileMixins],
   data() {
     return {
-      columns,
-      data
+      columns: [
+        {
+          dataIndex: 'name',
+          key: 'name',
+          slots: { title: 'customTitle' },
+          scopedSlots: { customRender: 'name' }
+        },
+        {
+          title: 'Tag',
+          key: 'tag',
+          scopedSlots: { customRender: 'tag' },
+          filteredValue: null,
+          filters: [],
+          onFilter: (value, record) => (record.tag || '').indexOf(value) > -1
+        },
+        {
+          title: '项目路径',
+          dataIndex: 'dir',
+          key: 'dir'
+        },
+
+        {
+          title: '操作',
+          key: 'action',
+          width: 120,
+          scopedSlots: { customRender: 'action' }
+        }
+      ],
+      data,
+      setTagShow: false,
+      setTagActiveKey: '',
+      tag: ''
     }
   },
-  mounted() {
+  created() {
     this.pm = new ProjectModal()
-    this.getProjects()
+    this.refreshProjects()
   },
+  mounted() {},
   methods: {
     fmt(ts) {
       return dateFormat('YYYY-mm-dd HH:MM', new Date(ts))
     },
+    closeTag(row) {
+      this.pm.setTag(row.dir, '')
+      this.refreshProjects()
+    },
+    setTag(row) {
+      this.setTagActiveKey = row.dir
+      this.setTagShow = true
+    },
+    handleSetTag() {
+      this.pm.setTag(this.setTagActiveKey, this.tag)
+      this.setTagShow = false
+      this.refreshProjects()
+      this.tag = ''
+    },
+    setTagFilters(data) {
+      const tags = Array.from(
+        new Set(
+          data
+            .map(e => {
+              return (e.tag && e.tag.split('、')) || []
+            })
+            .flat()
+        )
+      )
+      let tag_filters = tags.map(e => {
+        return { text: e, value: e }
+      })
+      this.columns[1].filters = tag_filters
+    },
+    handleTableChange(page, filters) {
+      this.columns[1].filteredValue = filters.tag
+    },
+    refreshProjects() {
+      this.columns[1].filteredValue = null
+      this.getProjects()
+    },
     getProjects() {
       const res = this.pm.getAll() || []
+      this.setTagFilters(res)
       this.data = res
     },
     removeProjects() {
@@ -120,7 +191,7 @@ export default {
         cancelText: '算了',
         onOk() {
           that.pm.removeAll()
-          that.getProjects()
+          that.refreshProjects()
         },
         onCancel() {}
       })
@@ -128,7 +199,7 @@ export default {
     add_project(isa) {
       const { code, msg } = this.pm.add(isa)
       if (code > 0) {
-        this.getProjects()
+        this.refreshProjects()
         return this.$message.info(msg)
       }
       this.$message.warning(msg)
@@ -137,7 +208,7 @@ export default {
     confirmDel(info) {
       const { code, msg } = this.pm.remove(info.dir)
       if (code > 0) {
-        this.getProjects()
+        this.refreshProjects()
         return this.$message.info(msg)
       }
       this.$message.warning(msg)
