@@ -9,7 +9,7 @@
       </a-button>
     </a-row>
     <a-row style="margin-top: 20px;">
-      <a-table :columns="columns" :data-source="data">
+      <a-table :columns="columns" :data-source="data" rowKey="dir">
         <a slot="name" slot-scope="text">{{ text }}</a>
         <span slot="customTitle"><a-icon type="smile-o" /> 项目名称</span>
         <span slot="action" slot-scope="row">
