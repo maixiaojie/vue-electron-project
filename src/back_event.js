@@ -25,11 +25,19 @@ const is_a_nodejs_project = (dir) => {
     return false
 }
 
-const openInVSC = (path) => {
+const exec_shell = (shell) => {
     const exec = require('child_process').exec
+    console.log(shell)
+    exec(shell)
+}
+
+const openInVSC = (path) => {
     let sh = `code ${path}`
-    console.log(sh)
-    exec(sh)
+    exec_shell(sh)
+}
+const openInTerminal = (path) => {
+    let sh = `osascript -e 'tell application "Terminal" to do script "cd ${path}"' `
+    exec_shell(sh)
 }
 const listen_start = () => {
     ipcMain.answerRenderer('is_a_nodejs_project', arg => {
@@ -40,6 +48,11 @@ const listen_start = () => {
     ipcMain.answerRenderer('openInVSC', arg => {
         return new Promise((resolve) => {
             resolve(openInVSC(arg))
+        })
+    })
+    ipcMain.answerRenderer('openInTerminal', arg => {
+        return new Promise((resolve) => {
+            resolve(openInTerminal(arg))
         })
     })
 }

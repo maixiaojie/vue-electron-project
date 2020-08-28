@@ -1,5 +1,10 @@
 import Vue from 'vue'
-import { Button, Tabs, Radio, Col, Row, Table, Tag, Icon, Divider, message } from 'ant-design-vue'
+import {
+  Button, Tabs, Radio, Col,
+  Row, Table, Tag, Icon, Divider, message,
+  Modal, Popconfirm, Popover,
+  Dropdown, Menu,
+} from 'ant-design-vue'
 import { is_app } from '@/utils/env.js'
 import storage from '@/plugin/storage.js'
 import { getElectron, getRemote, getIpcRenderer } from '@/plugin/remote'
@@ -25,6 +30,7 @@ if (is_app) {
   }
 }
 Vue.prototype.$message = message;
+Vue.prototype.$confirm = Modal.confirm;
 Vue.use(Button);
 Vue.use(Tabs);
 Vue.use(Radio);
@@ -33,7 +39,11 @@ Vue.use(Row);
 Vue.use(Table);
 Vue.use(Tag);
 Vue.use(Icon);
+Vue.use(Popconfirm);
 Vue.use(Divider);
+Vue.use(Popover);
+Vue.use(Dropdown);
+Vue.use(Menu);
 
 Vue.config.productionTip = false
 new Vue({
