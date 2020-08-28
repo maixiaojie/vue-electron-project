@@ -16,6 +16,7 @@
         <a slot="name" slot-scope="text, row">
           <a-popover placement="right">
             <template slot="content">
+              <p>项目目录：{{ row.name }}</p>
               <p>添加时间：{{ fmt(row.ts) }}</p>
               <p>
                 版本：
@@ -33,13 +34,15 @@
             <a class="ant-dropdown-link" @click="e => e.preventDefault()"> 打开 </a>
             <a-menu slot="overlay">
               <a-menu-item key="0">
-                <a @click="openProjectInFinder(row)">在finder中打开</a>
+                <a @click="openProjectInFinder(row)"><a-icon type="smile" theme="twoTone" /> open in Finder</a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a @click="openProjectVSC(row)">在vscode中打开</a>
+                <a @click="openProjectVSC(row)"
+                  ><a-icon type="heart" theme="twoTone" two-tone-color="#eb2f96" /> open in VSCode</a
+                >
               </a-menu-item>
               <a-menu-item key="2">
-                <a @click="openProjectInTerminal(row)">在终端中打开</a>
+                <a @click="openProjectInTerminal(row)"><a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" /> open in Terminal</a>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
