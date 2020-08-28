@@ -1,11 +1,11 @@
 <template>
   <div class="about">
     <div class="tools">
-      <a-dropdown placement="bottomCenter">
-        <a-button>选择shell</a-button>
-        <a-menu slot="overlay">
+      <a-dropdown :trigger="['click']" placement="bottomCenter">
+        <a-button>{{ cur_shell }}</a-button>
+        <a-menu slot="overlay" @click="handleShellMenuClick">
           <a-menu-item :key="sh" v-for="sh in shells">
-            <a>{{sh}}</a>
+            <a>{{ sh }}</a>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
@@ -28,6 +28,7 @@ export default {
       term: null,
       pty: null,
       fitAddon: null,
+      cur_shell: '选择默认shell',
       shells: ['zsh', 'bash', 'dash', 'ksh', 'csh', 'tcsh', 'sh']
     }
   },
@@ -36,6 +37,10 @@ export default {
     window.addEventListener('resize', this.onResize)
   },
   methods: {
+    handleShellMenuClick({ key }) {
+      this.cur_shell = key
+      this.pty.write(`${key} \r`)
+    },
     initTerm() {
       this.term = new Terminal({
         theme: {
@@ -75,9 +80,33 @@ export default {
 }
 </script>
 <style lang="scss">
+$bgcolor: rgb(0, 43, 54);
+$vue: rgb(66, 185, 131);
+$mainFontColor: rgba(255, 255, 255, 0.7);
 #terminal {
   // width: 100%;
   padding: 20px;
-  background: rgb(0, 43, 54);
+  background: $bgcolor;
+}
+.tools {
+  background: $bgcolor;
+  padding: 5px 0;
+  box-shadow: inset 0px -1px 1px 0px #42b983;
+  .ant-btn.ant-dropdown-trigger {
+    border: 0;
+    outline: none;
+    border-radius: 0;
+    min-width: 100px;
+    color: $mainFontColor;
+    background: $bgcolor;
+    &[ant-click-animating-without-extra-node]:after {
+      border: 0 none;
+      opacity: 0;
+      animation: none 0 ease 0 1 normal;
+    }
+    &:hover {
+      color: white;
+    }
+  }
 }
 </style>
