@@ -1,11 +1,18 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/"><a-icon type="heart" theme="twoTone" two-tone-color="#eb2f96" /> 项目列表</router-link> |
-      <router-link to="/about">构建列表</router-link>
+      <keep-alive>
+        <router-link to="/"><a-icon type="heart" theme="twoTone" two-tone-color="#eb2f96" /> 项目列表</router-link>
+      </keep-alive>
+      |
+      <keep-alive>
+        <router-link to="/about">构建列表</router-link>
+      </keep-alive>
     </div>
     <div class="view-wrapper">
-      <router-view />
+      <keep-alive>
+        <router-view v-if="$route.meta.keepAlive" />
+      </keep-alive>
     </div>
   </div>
 </template>

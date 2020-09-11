@@ -4,6 +4,7 @@ import {
   Row, Table, Tag, Icon, Divider, message,
   Modal, Popconfirm, Popover,
   Dropdown, Menu, Input,
+  Select,
 } from 'ant-design-vue'
 import { is_app } from '@/utils/env.js'
 import storage from '@/plugin/storage.js'
@@ -46,6 +47,8 @@ Vue.use(Dropdown);
 Vue.use(Menu);
 Vue.use(Modal);
 Vue.use(Input);
+Vue.use(Select);
+// Vue.use(SelectOption);
 
 Vue.config.productionTip = false
 new Vue({

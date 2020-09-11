@@ -1,13 +1,12 @@
-const path = window.require('path');
-
-const Conf = window.require('conf');
-
-const electron = window.require('electron');
+const require = window.require;
+const path = require('path');
+const Conf = require('conf');
+const electron = require('electron');
 
 class ElectronStore extends Conf {
 	constructor(options) {
 		const defaultCwd = (electron.app || electron.remote.app).getPath('userData');
-        console.log(defaultCwd)
+		console.log(defaultCwd)
 		options = {
 			name: 'config',
 			...options

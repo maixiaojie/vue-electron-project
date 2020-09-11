@@ -9,8 +9,21 @@
           </a-menu-item>
         </a-menu>
       </a-dropdown>
+      <a-select v-model="active_index" style="width: 120px">
+        <a-select-option v-for="(t, i) in terminals" :key="'options' + i" :value="i">
+          terminal {{ i + 1 }}
+        </a-select-option>
+      </a-select>
     </div>
-    <div id="terminal"></div>
+    <div class="terminals">
+      <a-tabs v-model="active_index" @change="terminalChange" :animated="false">
+        <a-tab-pane :key="i" v-for="(t, i) in terminals" :tab="'Tab' + i">
+          <div class="terminal-item">
+            <div :id="'terminal' + i"></div>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+    </div>
   </div>
 </template>
 <script>
@@ -29,35 +42,65 @@ export default {
       model: null,
       term: null,
       pty: null,
-      fitAddon: null,
+      fitAddon: [],
       cur_shell: '',
-      shells: ['zsh', 'bash', 'dash', 'ksh', 'csh', 'tcsh', 'sh']
+      shells: ['zsh', 'bash', 'dash', 'ksh', 'csh', 'tcsh', 'sh'],
+      terminals: [],
+      active_index: 0
+    }
+  },
+  activated() {
+    console.log('activated')
+    if (this.terminals.length === 0) {
+      this.add()
+    } else {
+      this.add()
     }
   },
   mounted() {
     this.model = new ShellTypeModal()
-    this.initTerm()
+    // this.initTerm(0)
     window.addEventListener('resize', this.onResize)
   },
   methods: {
     handleShellMenuClick({ key }) {
       this.cur_shell = key
-      this.pty.write(`${key} \r`)
+      this.terminals[this.active_index].terminal.write(`${key} \r\n`)
       this.model.set(key)
     },
-    initTerm() {
+    terminalChange() {
+      this.onResize()
+    },
+    async add() {
+      this.terminals.push({
+        pty: null,
+        terminal: null,
+        fitAddon: null
+      })
+      const len = this.terminals.length
+      const activeKey = len > 0 ? len - 1 : 0
+      console.log(activeKey)
+
+      this.active_index = activeKey
+      await this.$nextTick(() => {
+        this.initTerm(this.active_index)
+      })
+    },
+    async initTerm(i) {
       let origin_shell_type = this.model.get()
       this.cur_shell = origin_shell_type || '选择默认shell'
-      this.term = new Terminal({
+      this.terminals[i].terminal = new Terminal({
         theme: {
           background: 'rgb(0,43,54)'
         }
       })
-      this.fitAddon = new FitAddon()
-      this.term.loadAddon(this.fitAddon)
-      this.term.open(document.getElementById('terminal'))
+      this.terminals[i].fitAddon = new FitAddon()
+      this.terminals[i].terminal.loadAddon(this.terminals[i].fitAddon)
+      console.log(this.terminals)
+
+      this.terminals[i].terminal.open(document.getElementById('terminal' + i))
       const shell = os.platform() === 'win32' ? 'powershell.exe' : origin_shell_type || this.shells[0]
-      this.pty = pty.spawn(shell, [], {
+      this.terminals[i].pty = pty.spawn(shell, [], {
         name: 'xterm-color',
         cols: 80,
         rows: 34,
@@ -65,34 +108,30 @@ export default {
         env: process.env
       })
 
-      this.term.onData(data => {
-        this.pty.write(data)
+      this.terminals[i].terminal.onData(data => {
+        this.terminals[i].pty.write(data)
       })
-      this.pty.on('data', data => {
-        this.term.write(data)
+      this.terminals[i].pty.on('data', data => {
+        this.terminals[i].terminal.write(data)
       })
+      this.onResize()
     },
     onResize() {
       try {
-        this.fitAddon.fit()
+        this.terminals[this.active_index].fitAddon.fit()
       } catch (e) {
         console.log(e)
       }
     }
   },
-  beforeDestroy() {
-  }
+  beforeDestroy() {}
 }
 </script>
 <style lang="scss">
 $bgcolor: rgb(0, 43, 54);
 $vue: rgb(66, 185, 131);
 $mainFontColor: rgba(255, 255, 255, 0.7);
-#terminal {
-  // width: 100%;
-  padding: 20px;
-  background: $bgcolor;
-}
+
 .tools {
   background: $bgcolor;
   padding: 5px 0;
@@ -112,6 +151,16 @@ $mainFontColor: rgba(255, 255, 255, 0.7);
     &:hover {
       color: white;
     }
+  }
+}
+.terminals {
+  background: $bgcolor;
+  .terminal-item {
+    padding: 20px;
+    background: $bgcolor;
+  }
+  .ant-tabs-bar {
+    display: none;
   }
 }
 </style>
