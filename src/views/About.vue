@@ -9,15 +9,17 @@
           </a-menu-item>
         </a-menu>
       </a-dropdown>
-      <a-select v-model="active_index" style="width: 120px">
-        <a-select-option v-for="(t, i) in terminals" :key="'options' + i" :value="i">
+      <a-select v-model="active_key" style="width: 120px">
+        <a-select-option v-for="(t, i) in terminals" :key="'options' + t.key" :value="t.key">
           terminal {{ i + 1 }}
         </a-select-option>
       </a-select>
+      <a-button class="iconbtn" icon="plus" @click="add"></a-button>
+      <a-button class="iconbtn" icon="delete" @click="remove(undefined)"></a-button>
     </div>
     <div class="terminals">
-      <a-tabs v-model="active_index" @change="terminalChange" :animated="false">
-        <a-tab-pane :key="i" v-for="(t, i) in terminals" :tab="'Tab' + i">
+      <a-tabs v-model="active_key" @change="terminalChange" :animated="false">
+        <a-tab-pane :key="t.key" v-for="(t, i) in terminals" :tab="'Tab' + i">
           <div class="terminal-item">
             <div :id="'terminal' + i"></div>
           </div>
@@ -46,14 +48,13 @@ export default {
       cur_shell: '',
       shells: ['zsh', 'bash', 'dash', 'ksh', 'csh', 'tcsh', 'sh'],
       terminals: [],
-      active_index: 0
+      active_index: 0,
+      active_key: 0
     }
   },
   activated() {
     console.log('activated')
     if (this.terminals.length === 0) {
-      this.add()
-    } else {
       this.add()
     }
   },
@@ -65,7 +66,7 @@ export default {
   methods: {
     handleShellMenuClick({ key }) {
       this.cur_shell = key
-      this.terminals[this.active_index].terminal.write(`${key} \r\n`)
+      this.terminals[this.active_index].terminal.write(`${key} \r`)
       this.model.set(key)
     },
     terminalChange() {
@@ -73,18 +74,31 @@ export default {
     },
     async add() {
       this.terminals.push({
+        key: new Date().getTime(),
         pty: null,
         terminal: null,
         fitAddon: null
       })
       const len = this.terminals.length
       const activeKey = len > 0 ? len - 1 : 0
-      console.log(activeKey)
 
       this.active_index = activeKey
+      this.active_key = this.terminals[this.active_index].key
       await this.$nextTick(() => {
         this.initTerm(this.active_index)
       })
+    },
+    async remove(i) {
+      if (this.terminals.length === 1) {
+        return
+      }
+      const index = i === undefined ? this.active_index : i
+
+      const next_index = this.active_index === this.terminals.length - 1 ? this.active_index - 1 : this.active_index
+      this.terminals[index].terminal.dispose()
+      this.terminals.splice(index, 1)
+      this.active_index = next_index
+      this.active_key = this.terminals[this.active_index].key
     },
     async initTerm(i) {
       let origin_shell_type = this.model.get()
@@ -96,7 +110,6 @@ export default {
       })
       this.terminals[i].fitAddon = new FitAddon()
       this.terminals[i].terminal.loadAddon(this.terminals[i].fitAddon)
-      console.log(this.terminals)
 
       this.terminals[i].terminal.open(document.getElementById('terminal' + i))
       const shell = os.platform() === 'win32' ? 'powershell.exe' : origin_shell_type || this.shells[0]
@@ -143,6 +156,35 @@ $mainFontColor: rgba(255, 255, 255, 0.7);
     min-width: 100px;
     color: $mainFontColor;
     background: $bgcolor;
+    &[ant-click-animating-without-extra-node]:after {
+      border: 0 none;
+      opacity: 0;
+      animation: none 0 ease 0 1 normal;
+    }
+    &:hover {
+      color: white;
+    }
+  }
+  .ant-select {
+    color: white;
+  }
+  .ant-select-selection {
+    background-color: transparent;
+    border: 1px solid $vue;
+    height: 24px;
+    border-radius: 0;
+    .ant-select-selection__rendered {
+      line-height: 24px;
+    }
+  }
+  .ant-select-arrow {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .iconbtn {
+    background: transparent;
+    color: white;
+    border: 0;
+    margin-left: 5px;
     &[ant-click-animating-without-extra-node]:after {
       border: 0 none;
       opacity: 0;

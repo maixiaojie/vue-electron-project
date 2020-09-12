@@ -15,6 +15,7 @@ module.exports = {
     'no-debugger': 0,
     'import/named': 0,
     semi: 0,
+    'no-useless-escape': 0,
     'arrow-body-style': 0,
     'prefer-template': 0,
     // semi: ['error', 'never'], // 禁用 分号
